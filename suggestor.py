@@ -7,6 +7,7 @@ import random
 DEBUG_DIR = './debug/'
 SIMULATION_DIR = './simulation/'
 PREPROCESSED = 'preprocessed/'
+DICTIONARY_DIR = './dictionary/'
 
 class Suggestor:
 
@@ -23,6 +24,48 @@ class Suggestor:
 
 		self.matches = 0
 		self.mistakes = 0
+
+	def simulateThreeValues(self):
+		directory = SIMULATION_DIR + PREPROCESSED
+		simulationFiles = [f for f in os.listdir(directory) if 'txt' in f ]
+
+		for filename in simulationFiles:
+			f = open(directory + filename, 'r')
+			for line in f:
+				previsionList = None
+				for c in line:
+					if(previsionList is not None):
+						if(c in previsionList):
+							self.matches += 1
+						else:
+							self.mistakes += 1
+
+					self.state = ord(c)%64
+					previsionList = []
+					row = self.transitionMatrix[self.state]
+					for i in range(3):
+						#print(row)
+						r = self.predictManyTimes(row)
+						previsionList.append(r)
+						index = ord(r)
+						if(index == 32):
+							index = 0
+						else:
+							index = index%64
+						#value = row[index]/(len(row)-1)
+						
+						#row[index] = 0#- value
+						#row = [x+value for x in row]
+
+					
+		result = open("result3.txt", 'w')
+		result.write("Matches = " + str(self.matches) + "\n")
+		result.write("Mistakes = " + str(self.mistakes) + "\n")
+		rate = self.matches/(self.matches+ self.mistakes )
+		result.write("Sucess Rate = " + str( rate*100 ) + "%\n")
+
+		result.close()
+		print("Simulation with 3 Done")
 
 	def buildTransitionMatrix(self):
 		transitionMatrix = [[0 for x in range(27)] for x in range(27)]
@@ -64,13 +107,14 @@ class Suggestor:
 		p = random.random()
 		#print p
 		aux = 0
-		index = 0
+		index = -1
 		while( aux < p):
 			#print str(index) + " " + str(aux)
-			aux += self.transitionMatrix[self.state][index]
 			index += 1
+			aux += self.transitionMatrix[self.state][index]
+			
 
-		self.state = index
+		#self.state = index
 		if(index == 0):
 			return ' '
 		return chr(index+64)
@@ -87,6 +131,19 @@ class Suggestor:
 		for line in f:
 			self.transitionMatrix[index] = line.split()
 			index += 1
+
+
+	def predictManyTimes(self, transitions):
+			p = random.random()
+			aux = 0
+			index = -1
+			while( aux < p):
+				index += 1
+				aux += transitions[index]
+					 
+			if(index == 0):
+				return ' '
+			return chr(index+64)
 
 	def simulate(self):
 		directory = SIMULATION_DIR + PREPROCESSED
@@ -129,5 +186,51 @@ class Suggestor:
 		result.close()
 		print("Simulation Done")
 
+	def predictUsingDictionary(self, dictionary, word):
+		predicted = None
+		while(predicted is None):
+			predicted = self.generateRandomChar()
+			queryResult = [x for x in dictionary if word in x]
+			if(len(queryResult) == 0):
+				predicted = None
+
+		return predicted
+
+	def simulateUsingDictionary(self):
+		directory = SIMULATION_DIR + PREPROCESSED
+		simulationFiles = [f for f in os.listdir(directory) if 'txt' in f ]
+		matches = 0
+		mistakes = 0
+		for filename in simulationFiles:
+			f = open(directory + filename, 'r')
+			for line in f:
+				prevision = None
+				word = ""
+				miniDictionary = None
+				for c in line:
+					if(len(word) > 0):
+						if(len(word) == 1):
+							print("UHHUUULL " + DICTIONARY_DIR + word + ".txt")
+							f = open(DICTIONARY_DIR + word + ".txt", 'r')
+							miniDictionary = f.read().split()
+						if(c == prevision):
+							matches += 1
+						else:
+							mistakes += 1
+					word += c
+					self.state = ord(c)%64
+					if(len(word) > 1):
+						prevision = self.predictUsingDictionary(miniDictionary, word)
+						miniDictionary = [x for x in miniDictionary if word in x]
+
+				f.close()
+		result = open("resultDictionary.txt", 'w')
+		result.write("Matches = " + str(matches) + "\n")
+		result.write("Mistakes = " + str(mistakes) + "\n")
+		rate = matches/(matches+ mistakes )
+		result.write("Sucess Rate = " + str( rate*100 ) + "%\n")
+
+		result.close()
+		print("Simulation Using Dictionary Done")
 
 

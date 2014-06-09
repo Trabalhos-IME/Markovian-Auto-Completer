@@ -103,6 +103,35 @@ class Preprocessor:
 							a += 64
 							outputFile.write( chr( a ) ) 
 						except Exception:
-							print aux
+							#print aux
+							pass
+			inputFile.close()
+			outputFile.close()
+
+	def preProcessToDictionary(self, dictionary_dir):
+		files = [f for f in os.listdir(SIMULATION_DIR) if 'txt' in f ]
+
+		for filename in files:
+			inputFile = open(self.TEST_DIR + filename, 'r')
+			outputFile = open(dictionary_dir +"preprocessed/" + "p_" + filename, 'w')
+			for line in inputFile:
+				line = line.upper()
+				for c in line:
+					aux = ord(c)
+					if(aux == 195 or c == '\n'):
+						continue
+					elif(aux < 128):
+						if(aux < 64 or aux > 90):
+							outputFile.write('\n')
+						else:
+							outputFile.write(c)
+					else:
+						try:
+							a = self.specialChars[aux]
+							a += 64
+							outputFile.write( chr( a ) ) 
+						except Exception:
+							#print aux
+							pass
 			inputFile.close()
 			outputFile.close()

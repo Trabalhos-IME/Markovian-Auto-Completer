@@ -1,6 +1,6 @@
-Matches = 27126
-Mistakes = 864379
-Sucess Rate = 3.04271989501%
-At Random Matches = 26798
-At Random Mistakes = 864707
-Sucess Rate at Random = 3.00592817763%
+Matches = 100655
+Mistakes = 790850
+Sucess Rate = 11.29045827%
+At Random Matches = 26412
+At Random Mistakes = 865093
+Sucess Rate at Random = 2.96263060779%
